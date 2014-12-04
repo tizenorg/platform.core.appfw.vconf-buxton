@@ -6,5 +6,5 @@ includedir=@INCLUDEDIR@
 Name: vconf-buxton
 Description: configuration system library
 Version: @VERSION@
-Libs: -L${libdir} -lvconf-buxton -lpthread
+Libs: -L${libdir} -l@LIBNAME@ -lpthread
 Cflags: -I${includedir}

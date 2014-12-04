@@ -64,6 +64,7 @@ ln -sf ../%{libname}-setup.service %{buildroot}%{_unitdir}/basic.target.wants/
 
 %post
 /sbin/ldconfig
+vconf-buxton-init-from-vconf.sh
 
 %postun
 /sbin/ldconfig
@@ -81,11 +82,13 @@ ln -sf ../%{libname}-setup.service %{buildroot}%{_unitdir}/basic.target.wants/
 
 %files devel
 %manifest %{name}.manifest
+%{_includedir}/vconf/vconf.h
 %{_includedir}/vconf/vconf-buxton.h
 %{_libdir}/pkgconfig/%{libname}.pc
 %{_libdir}/lib%{libname}.so
 
 %files keys-devel
 %manifest %{name}.manifest
+%{_includedir}/vconf/vconf-keys.h
 %{_includedir}/vconf/vconf-buxton-keys.h
 
