@@ -1,0 +1,14 @@
+[Unit]
+Description=Initialize the vconf-buxton memory storage
+DefaultDependencies=no
+Requires=buxton.service
+After=buxton.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/vconf-buxton-restore-mem-layer.sh
+#ExecStop=/usr/bin/vconf-buxton-backup-mem-layer.sh
+
+[Install]
+WantedBy=basic.target
+

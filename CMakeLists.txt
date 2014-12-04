@@ -1,0 +1,37 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(vconf-buxton C)
+
+SET(PREFIX ${CMAKE_INSTALL_PREFIX})
+SET(EXEC_PREFIX "\${prefix}")
+SET(LIBDIR ${LIB_INSTALL_DIR})
+SET(INCLUDEDIR "\${prefix}/include/vconf")
+SET(VERSION_MAJOR 0)
+SET(VERSION_MINOR 1)
+SET(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.0")
+SET(BINDIR "${PREFIX}/bin")
+SET(SYSTEMDDIR "lib/systemd/system")
+
+set(CMAKE_SKIP_BUILD_RPATH true)
+
+SET(SRCS vconf-buxton.c)
+
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+
+INCLUDE(FindPkgConfig)
+pkg_check_modules(pkgs REQUIRED glib-2.0 vconf-internal-keys libbuxton)
+
+FOREACH(flag ${pkgs_CFLAGS})
+	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
+ENDFOREACH(flag)
+
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
+
+#ADD_DEFINITIONS("-Werror")
+ADD_DEFINITIONS("-Wall")
+#ADD_DEFINITIONS("-Wextra")
+#ADD_DEFINITIONS("-ansi")
+#ADD_DEFINITIONS("-pedantic")
+
+ADD_DEFINITIONS("-DPREFIX=\"${PREFIX}\"")
+
+add_subdirectory(src)

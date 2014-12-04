@@ -1,0 +1,10 @@
+prefix=@PREFIX@
+exec_prefix=@EXEC_PREFIX@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
+
+Name: vconf-buxton
+Description: configuration system library
+Version: @VERSION@
+Libs: -L${libdir} -lvconf-buxton -lpthread
+Cflags: -I${includedir}
