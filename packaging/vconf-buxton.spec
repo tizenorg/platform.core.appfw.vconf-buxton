@@ -11,7 +11,7 @@
 
 Name:       vconf-buxton
 Summary:    Configuration system library
-Version:    0.1
+Version:    0.3
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0
@@ -21,9 +21,12 @@ Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(libbuxton)
+BuildRequires:  pkgconfig(buxton)
 BuildRequires:  pkgconfig(vconf-internal-keys)
 Obsoletes: vconf
+Obsoletes:  vconf-devel
+Obsoletes:  vconf-keys-devel
+Provides: vconf
 
 %description 
 Configuration system library having vconf API and buxton backend
@@ -31,9 +34,9 @@ Configuration system library having vconf API and buxton backend
 %package devel
 Summary:    Vconf-buxton (devel)
 Requires:   %{name} = %{version}-%{release}
-Requires:   vconf-buxton = %{version}-%{release}
-Requires:   vconf-buxton-keys-devel = %{version}-%{release}
+Requires:   %{name}-keys-devel = %{version}-%{release}
 Obsoletes:  vconf-devel
+Provides:  vconf-devel
 
 %description devel
 Vconf library (devel)
@@ -41,9 +44,10 @@ Vconf library (devel)
 %package keys-devel
 Summary:    Vconf-buxton (devel)
 Requires:   %{name} = %{version}-%{release}
-Requires:   vconf-buxton = %{version}-%{release}
 Requires:   vconf-internal-keys-devel
 Obsoletes:  vconf-keys-devel
+Obsoletes:  vconf-devel
+Provides:  vconf-keys-devel
 
 %description keys-devel
 Vconf key management header files
