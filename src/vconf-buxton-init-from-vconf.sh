@@ -12,10 +12,21 @@ layer=base
 group=vconf
 label=User
 
-reset=$(printf '\e[0m')
-red=$(printf '\e[1;31m')
-green=$(printf '\e[1;32m')
-
+#
+# prompting
+#
+if [[ -t 1 ]]
+then
+  reset=$(printf '\e[0m')
+  red=$(printf '\e[1;31m')
+  yellow=$(printf '\e[1;33m')
+  green=$(printf '\e[1;32m')
+else
+  reset=
+  red=
+  yellow=
+  green=
+fi
 
 #
 # create the default group for vconf
@@ -40,6 +51,15 @@ then
 else
     echo "${red}ERROR: can't set label '$label' to group '$group' for layer '$layer'${reset}"
     exit 1
+fi
+
+#
+# Check existing root
+#
+if [[ ! -d $root ]]
+then
+  echo "${green}No legacy vconf data.${reset}"
+  exit 0
 fi
 
 #

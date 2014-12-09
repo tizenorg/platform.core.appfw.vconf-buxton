@@ -49,8 +49,9 @@ badargs() {
 #
 # calls to buxton
 #
+buxmode=$(pgrep buxtond >/dev/null 2>&1 && echo -n -s || echo -n -d)
 buxton() {
-  buxtonctl "$@"
+  buxtonctl $buxmode -- "$@"
 }
 
 buxton_is_ready() {
@@ -184,7 +185,14 @@ group=vconf
 layer_of_key() {
   case "$1/" in
   user/*) echo -n "user";;
-  memory/*) echo -n "temp";;
+  memory/*)
+    if [[ "$buxmode" = '-d' ]]
+    then
+      error "the layer temp isn't available in direct mode"
+      exit
+    fi
+    echo -n "temp"
+    ;;
   *) echo -n "base";;
   esac
 }
@@ -238,6 +246,20 @@ setkey() {
   fi
 }
 
+# calls getopt with negative numbers protection
+mygetopt() {
+  local name="$exe $1" long="$2" short="$3" x=
+  shift 3
+  eval set -- $(
+    for x; do
+      echo -n "'$x'" |
+      sed "s:\(.\)'\(.\):\\1\\\\'\\2:g ; s/^'\(-[0-9.]*\)'\$/'protect-sign:\1'/ ; s/^.*/& /"
+    done
+  )
+  getopt -n "$name" -l "$long" -o "$short" -- "$@" |
+  sed "s/'protect-sign:/'/g"
+}
+
 #
 # ensure existing the group for vconf
 #
@@ -248,7 +270,7 @@ doset() {
   local typ= name= layer= value= smack= force=false instal=false
 
   # scan arguments
-  eval set -- $(getopt -n "$exe set" -l force,install,type:,smack:,group:,user: -o fit:s:g:u: -- "$@")
+  eval set -- $(mygetopt set force,install,type:,smack:,group:,user: fit:s:g:u: "$@")
   while :
   do
     case "$1" in
@@ -269,7 +291,7 @@ doset() {
       shift
       ;;
     -u|-g|--user|--group)
-      warning "option $1 $2 ignored!"
+      info "option $1 $2 ignored!"
       shift 2
       ;;
     --)
@@ -292,7 +314,8 @@ doset() {
   then
     if expr "$name" : memory/ >/dev/null
     then
-      setkey "$typ" "memory_init/$name" "$value" "$smack"
+      setkey "$typ" "memory_init/$name" "$value" "$smack" || exit
+      [[ "$buxmode" = -d ]] && exit
     else
       warning only keys beginning with memory/ are allowing option -i
     fi
@@ -306,7 +329,7 @@ doget() {
   local name= layer= rec=false val=
 
   # scan arguments
-  eval set -- $(getopt -n "$exe get" -l recursive -o r -- "$@")
+  eval set -- $(mygetopt get recursive r "$@")
   if [[ "$1" = "-r" || "$1" = "--recursive" ]]
   then
     rec=true

@@ -14,9 +14,21 @@ groupmem=vconf
 groupdb=vconf
 label=User
 
-reset=$(printf '\e[0m')
-red=$(printf '\e[1;31m')
-green=$(printf '\e[1;32m')
+#
+# prompting
+#
+if [[ -t 1 ]]
+then
+  reset=$(printf '\e[0m')
+  red=$(printf '\e[1;31m')
+  yellow=$(printf '\e[1;33m')
+  green=$(printf '\e[1;32m')
+else
+  reset=
+  red=
+  yellow=
+  green=
+fi
 
 #
 # check that buxton service is available
