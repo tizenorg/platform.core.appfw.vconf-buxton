@@ -4,13 +4,14 @@
 #
 # author: jose.bollo@open.eurogiciel.org
 
+exe="$(basename "$0")"
 verbose=false
 quiet=false
 
 #
 # prompting
 #
-if tty --silent
+if [[ -t 1 ]]
 then
   reset=$(printf '\e[0m')
   red=$(printf '\e[1;31m')
@@ -39,7 +40,9 @@ error() {
 }
 
 badargs() {
-  error "bad arguments"
+  local cmd="$1"
+  shift
+  error "$exe $cmd: bad arguments $*"
   exit
 }
 
@@ -218,6 +221,23 @@ b2vtype() {
   esac
 }
 
+#set a key
+setkey() {
+  local typ="$1" name="$2" value="$3" smack="$4" layer=
+
+  layer="$(layer_of_key "$name")"
+  typ="$(v2btype "$typ")"
+  value="$(stdval "$typ" "$value")"
+  
+  if buxton "set-$typ" "$layer" "$group" "$name" "$value" > /dev/null
+  then
+    info "key $name in group $group of layer $layer set to $typ: $value"
+    [[ -z "$smack" ]] || buxton_set_label "$layer" "$group" "$name" "$smack"
+  else
+    error "can not set key $name in group $group of layer $layer with $typ: $value"
+  fi
+}
+
 #
 # ensure existing the group for vconf
 #
@@ -225,19 +245,18 @@ buxton_ensure_group "base" "$group" || exit
 
 # set the value
 doset() {
-  local typ= name= layer= value= smack= force=false
+  local typ= name= layer= value= smack= force=false instal=false
 
   # scan arguments
-  while [[ $# -ne 0 ]]
+  eval set -- $(getopt -n "$exe set" -l force,install,type:,smack:,group:,user: -o fit:s:g:u: -- "$@")
+  while :
   do
     case "$1" in
     -t|--type)
-      [[ $# -ge 2 && -z "$typ" ]] || badargs
       typ="$2"
       shift 2
       ;;
     -s|--smack)
-      [[ $# -ge 2 && -z "$smack" ]] || badargs
       smack="$2"
       shift 2
       ;;
@@ -246,35 +265,39 @@ doset() {
       shift
       ;;
     -i|--install)
-      warning "option $1 ignored!"
+      instal=true
       shift
       ;;
     -u|-g|--user|--group)
-      [[ $# -ge 2 ]] || badargs
       warning "option $1 $2 ignored!"
       shift 2
       ;;
+    --)
+      shift
+      break
+      ;;
     *)
-      [[ $# -ge 2 && -z "$name" ]] || badargs
-      name="$1"
-      value="$2" 
-      shift 2
+      badargs set "$*"
       ;;
     esac
   done
-  [[ -n "$typ" && -n "$name" ]] || badargs
+  [[ "$#" -eq 2 ]] || badargs set "$*"
+  name="$1"
+  value="$2"
+  [[ -n "$typ" ]] || badargs set no type given
+  [[ -n "$name" ]] || badargs set no keyname given
 
   # process
-  layer="$(layer_of_key "$name")"
-  typ="$(v2btype "$typ")"
-  value="$(stdval "$typ" "$value")"
-  
-  if buxton "set-$typ" "$layer" "$group" "$name" "$value" > /dev/null
+  if $instal
   then
-    info "key $name in group $group of layer $layer set to $typ: $value"
-  else
-    error "can not set key $name in group $group of layer $layer with $typ: $value"
+    if expr "$name" : memory/ >/dev/null
+    then
+      setkey "$typ" "memory_init/$name" "$value" "$smack"
+    else
+      warning only keys beginning with memory/ are allowing option -i
+    fi
   fi
+  setkey "$typ" "$name" "$value" "$smack"
   exit
 }
 
@@ -283,21 +306,16 @@ doget() {
   local name= layer= rec=false val=
 
   # scan arguments
-  while [[ $# -ne 0 ]]
-  do
-    case "$1" in
-    -r|--recursive)
-      rec=true
-      shift
-      ;;
-    *)
-      [[ $# -eq 1 && -n "$1" ]] || badargs
-      name="$1"
-      shift
-      ;;
-    esac
-  done
-  [[ -n "$name" ]] || badargs
+  eval set -- $(getopt -n "$exe get" -l recursive -o r -- "$@")
+  if [[ "$1" = "-r" || "$1" = "--recursive" ]]
+  then
+    rec=true
+    shift
+  fi
+  [[ "$1" = -- ]] || badargs get unexpected error
+  shift
+  [[ $# -eq 1 && -n "$1" ]] || badargs get "$@"
+  name="$1"
 
   # process
   layer="$(layer_of_key "$name")"
@@ -329,7 +347,7 @@ dounset() {
   local name= layer=
 
   # scan arguments
-  [[ $# -eq 1 && -n "$name" ]] || badargs
+  [[ $# -eq 1 && -n "$name" ]] || badargs unset
   name="$1"
   layer="$(layer_of_key "$name")"
 
@@ -343,7 +361,7 @@ dolabel() {
   local name= smack= layer=
   
   # scan arguments
-  [[ $# -eq 2 && -n "$name" && -n "$smack" ]] || badargs
+  [[ $# -eq 2 && -n "$name" && -n "$smack" ]] || badargs label
   name="$1"
   smack="$2"
   layer="$(layer_of_key "$name")"
@@ -358,7 +376,6 @@ dolabel() {
 
 
 
-exe="$(basename "$0")"
 cmd="${1,,}"
 shift
 
@@ -386,7 +403,8 @@ Command set: set a value (create or update)
 
           -u, --user    <UID>    ignored! (compatibility)
           -g, --group   <GID>    ignored! (compatibility)
-          -i, --install          ignored! (compatibility)
+          -i, --install          for keys starting with memory/
+                                 installs in db the startup value
           -s, --smack   <LABEL>  tells to set the security label <LABEL>
           -f, --force            tells force updating the value
 
