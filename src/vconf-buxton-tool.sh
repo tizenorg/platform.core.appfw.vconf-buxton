@@ -47,9 +47,23 @@ badargs() {
 }
 
 #
-# calls to buxton
+# detects buxton mode
 #
 buxmode=
+if buxtonctl -s check >/dev/null 2>&1
+then
+  buxmode=-s
+elif buxtonctl -d check >/dev/null 2>&1
+then
+  buxmode=-d
+else
+  error "unable to detect buxton mode"
+  exit
+fi
+
+#
+# calls to buxton
+#
 buxton() {
   buxtonctl $buxmode -- "$@"
 }
