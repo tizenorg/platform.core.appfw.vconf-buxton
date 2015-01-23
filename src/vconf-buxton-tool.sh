@@ -49,7 +49,7 @@ badargs() {
 #
 # calls to buxton
 #
-buxmode=$(pgrep buxtond >/dev/null 2>&1 && echo -n -s || echo -n -d)
+buxmode=
 buxton() {
   buxtonctl $buxmode -- "$@"
 }
