@@ -17,6 +17,7 @@ Group:      System/Libraries
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 Source1001: 	vconf-buxton.manifest
+Requires:	util-linux
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 BuildRequires:  cmake
