@@ -70,7 +70,15 @@ sed 's:^found key ::' |
 while read keydb
 do
     keymem=${keydb#memory_init/}
-    if ! q=$(buxtonctl -s get "$layerdb" "$groupdb" "$keydb")
+    if t=$(buxtonctl -s get "$layermem" "$groupmem" "$keymem")
+    then
+        value=$(echo -n "$t" | sed 's/.* = [^:]*: \(.*\)/\1/')
+        echo "${reset}$keymem is already set as $value"
+        if ! buxtonctl -s set-label "$layermem" "$groupmem" "$keymem" "$label"
+        then
+            echo "${red}ERROR WHILE SETTING LABEL${reset}"
+        fi
+    elif ! q=$(buxtonctl -s get "$layerdb" "$groupdb" "$keydb")
     then
         echo "${red}ERROR can't get value of $keydb${reset}"
     else
