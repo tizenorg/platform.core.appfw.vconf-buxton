@@ -528,6 +528,10 @@ _handle_buxton_response_ (int lock)
   result = buxton_client_handle_response (_buxton_ ());
   if (result < 0)
     ERR ("Error in buxton_client_handle_response: %m");
+  if (result == 0) {
+    ERR ("Connection closed");
+    result = -1;
+  }
   if (lock)
     UNLOCK (buxton);
   return result;
@@ -1153,7 +1157,13 @@ _notify_reg_unreg_ (struct notify *notif, bool reg)
 static gboolean
 _cb_glib_ (GIOChannel * src, GIOCondition cond, gpointer data)
 {
-  _handle_buxton_response_ (1);
+  int status;
+
+  status = _handle_buxton_response_ (1);
+  if (status < 0) {
+    glib_source = NULL;
+    return G_SOURCE_REMOVE;
+  }
   return G_SOURCE_CONTINUE;
 }
 
