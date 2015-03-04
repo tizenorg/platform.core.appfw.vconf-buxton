@@ -193,6 +193,7 @@ buxton_unset() {
 #############################################################################################
 
 group=vconf
+context=User
 
 
 # get the layer of the key
@@ -277,7 +278,7 @@ mygetopt() {
 #
 # ensure existing the group for vconf
 #
-buxton_ensure_group "base" "$group" || exit
+buxton_ensure_group "base" "$group" "$context" || exit
 
 # set the value
 doset() {
