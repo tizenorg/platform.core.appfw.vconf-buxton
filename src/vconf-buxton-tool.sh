@@ -160,7 +160,12 @@ buxton_ensure_group() {
   else
     buxton_make_group "$layer" "$group" || return
   fi
-  [[ -z "$label" ]] || buxton_set_label "$layer" "$group" "$label"
+  if [[ -n "$label" ]] && [[ "$label" != "$(buxton_get_label "$layer" "$group")" ]]
+  then
+    buxton_set_label "$layer" "$group" "$label"
+  else
+    info "group $group in layer $layer already has label $label"
+  fi
 }
 
 buxton_ensure_ready() {
