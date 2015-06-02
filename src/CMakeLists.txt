@@ -28,9 +28,9 @@ INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/src/vconf-buxton-restore-mem-layer.sh DESTI
 INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/src/vconf-buxton-backup-mem-layer.sh DESTINATION bin)
 INSTALL(PROGRAMS ${CMAKE_SOURCE_DIR}/src/vconf-buxton-tool.sh DESTINATION bin RENAME ${TOOLNAME})
 INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${LIBNAME}.pc DESTINATION ${LIB_INSTALL_DIR}/pkgconfig)
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/vconf-buxton.h DESTINATION include/vconf)
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/vconf-buxton-keys.h DESTINATION include/vconf)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/include/vconf-buxton.h DESTINATION include/vconf)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/include/vconf-buxton-keys.h DESTINATION include/vconf)
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/vconf-buxton-setup.service DESTINATION ${SYSTEMDDIR})
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/vconf.h DESTINATION include/vconf)
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/vconf-keys.h DESTINATION include/vconf)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/include/vconf.h DESTINATION include/vconf)
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/include/vconf-keys.h DESTINATION include/vconf)
 
