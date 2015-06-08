@@ -85,11 +85,17 @@
  * @{
  */
 
+#include <errno.h>
 #include "vconf-buxton-keys.h"
 
 #ifdef __cplusplus
 extern          "C" {
 #endif
+
+#define VCONF_OK                 0
+#define VCONF_ERROR             -1
+#define VCONF_ERROR_FILE_NO_ENT -ENOENT
+#define VCONF_ERROR_FILE_PERM   -EPERM
 
 /**
  * @brief Enumeration for uses of vconf_get().
@@ -1205,6 +1211,15 @@ int main()
  */
     int             vconf_exists(const char *keyname);
 
+/**
+ * This function returns result of last api call
+ * @return The result of last api call
+ * @retval #VCONF_OK                 Successful
+ * @retval #VCONF_ERROR              General error
+ * @retval #VCONF_ERROR_FILE_NO_ENT  No such key
+ * @retval #VCONF_ERROR_FILE_PERM    Permission denied
+ */
+    int             vconf_get_ext_errno(void);
 /**
  * @}
  */

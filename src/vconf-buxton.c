@@ -57,9 +57,6 @@
 #include "vconf-buxton.h"
 #include "log.h"
 
-#define VCONF_OK      0
-#define VCONF_ERROR  -1
-
 /*================= SECTION definition of types =============*/
 
 /*
@@ -238,6 +235,11 @@ static int internal_list_count = 0;
  */
 static GSource *glib_source = NULL;
 #endif
+
+/*
+ * error code for vconf_get_ext_errno()
+ */
+static int g_vconf_errno = 0;
 
 #if !defined(NO_MULTITHREADING)
 /*
@@ -679,7 +681,7 @@ _cb_inc_received_ (BuxtonResponse resp, keynode_t * keynode)
 
   list = keynode->list;
   list->cb_received++;
-  if (buxton_response_status (resp) != 0)
+  if ((g_vconf_errno = buxton_response_status (resp)) != 0)
     {
       ERR ("Buxton returned error %d for key %s",
 	   buxton_response_status (resp), keynode->keyname);
@@ -761,7 +763,7 @@ _cb_refresh_ (BuxtonResponse resp, keynode_t * keynode)
 
   list = keynode->list;
   list->cb_received++;
-  if (buxton_response_status (resp) != 0)
+  if ((g_vconf_errno = buxton_response_status (resp)) != 0)
     {
       ERR ("Error %d while getting buxton key %s",
 	   buxton_response_status (resp), keynode->keyname);
@@ -790,7 +792,7 @@ _cb_scan_ (BuxtonResponse resp, struct scanning_data *data)
   /*
    * check the response status 
    */
-  if (buxton_response_status (resp) != 0)
+  if ((g_vconf_errno = buxton_response_status (resp)) != 0)
     {
       ERR ("Error while getting list of names from buxton");
       data->cb_status = VCONF_ERROR;
@@ -2084,4 +2086,11 @@ vconf_get_str (const char *keyname)
     return NULL;
 
   return single.node.value.s;
+}
+
+int
+vconf_get_ext_errno (void)
+{
+  INFO("vconf errno: %d", g_vconf_errno);
+  return g_vconf_errno;
 }
