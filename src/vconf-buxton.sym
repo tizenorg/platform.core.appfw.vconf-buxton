@@ -38,6 +38,7 @@ VCONF_BUXTON_1.0 {
 		vconf_ignore_key_changed;
 		vconf_set_label;
 		vconf_set_labels;
+		vconf_get_ext_errno;
 	local:
 		*;
 };
